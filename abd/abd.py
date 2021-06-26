@@ -3,8 +3,10 @@
 # abd.py
 
 #
-# Python 3.4 compatible
+# Python 3.6 compatible
 #
+
+from typing import Callable, Dict, Tuple, Union
 
 import functools
 from abc import ABC, abstractmethod
@@ -19,13 +21,12 @@ class AbstractBaseDecorator(ABC):
     The decorators accepts arguments & keyword arguments.
     """
     # class attributes
-    _deco_args = ()  # type: tuple
-    _deco_kwargs = {}  # type: dict
-    _decorated_obj = None  # type: callable
+    _deco_args: Tuple = ()
+    _deco_kwargs: Dict = {}
+    _decorated_obj: Callable = None
 
     @property
-    def decorated_object(self):
-        # type: () -> callable
+    def decorated_object(self) -> Callable:
         """
         Returns the function that is decorated.
         This should be used/called in AbstractBaseDecorator.invoke
@@ -36,8 +37,7 @@ class AbstractBaseDecorator(ABC):
         return self._decorated_obj
 
     @property
-    def decorator_options(self):
-        # type: () -> (tuple, dict)
+    def decorator_options(self) -> Tuple[Tuple, Dict]:
         """Return the arguments or keyword arguments
         These are given when the creating a new class instance
         :return: The options; (arguments, keyword arguments)
@@ -45,8 +45,7 @@ class AbstractBaseDecorator(ABC):
         """
         return self._deco_args, self._deco_kwargs
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         """A visual representation that dynamically returns
           <@><class name><(options)>< -> decorated function>
         :return: A string representing the decorator and function
@@ -67,8 +66,7 @@ class AbstractBaseDecorator(ABC):
         # return dynamic representation
         return '{0}{1}{2}{3}'.format(at, class_name, options, func)
 
-    def __init__(self, *args, **kwargs):
-        # type: (*object, **object) -> None
+    def __init__(self, *args: object, **kwargs: object) -> None:
         """Initialization function of the class.
         The 1st argument is considered to be the
           decorated or wrapped function.
@@ -98,8 +96,8 @@ class AbstractBaseDecorator(ABC):
         if callable(function) and self._decorated_obj is None:
             self._decorate(function)
 
-    def __call__(self, *args, **kwargs):
-        # type: (*object, **object) -> object or callable
+    def __call__(self, *args: object, **kwargs: object
+                 ) -> Union[object, Callable]:
         """This function is invoked
           when the decorated/wrapped function is called.
         Or when an instance of this class gets decorated/wrapped again.
@@ -130,30 +128,24 @@ class AbstractBaseDecorator(ABC):
         return self.invoke(*args, **kwargs)
 
     @staticmethod
-    def _pop_callable(*args):
-        # type: (*object) -> (callable, tuple) or (None, tuple)
+    def _pop_callable(*args: object) -> Union[Union[Callable, None], Tuple]:
         function = None
         if args and callable(args[0]):
             function, *args = args  # pop function from args
         return function, tuple(args)
 
-    def _decorate(self,
-                  function  # type: callable
-                  ):
-        # type: (*object, **object) -> None
+    def _decorate(self, function: Callable) -> None:
         """Set the given function as the decorated function."""
         functools.update_wrapper(self, function)
         self._decorated_obj = function
 
-    def set_decorator_options(self, *args, **kwargs):
-        # type: (*object, **object) -> None
+    def set_decorator_options(self, *args: object, **kwargs: object) -> None:
         """Set or override the options of the decorator."""
         self._deco_args = args
         self._deco_kwargs = kwargs
 
     @abstractmethod
-    def invoke(self, *args, **kwargs):
-        # type: (*object, **object) -> object
+    def invoke(self, *args: object, **kwargs: object) -> Union[object, None]:
         """When the decorated function is called
           this function is called by __call__.
         This must be overridden by the class that inherit this class.
@@ -167,9 +159,7 @@ ABD = AbstractBaseDecorator
 
 class BaseDecorator(ABD):
     """Most basic decorator"""
-
-    def invoke(self, *args, **kwargs):
-        # type: (*object, **object) -> object
+    def invoke(self, *args: object, **kwargs: object) -> Union[object, None]:
         return self.decorated_object(*args, **kwargs)
 
 

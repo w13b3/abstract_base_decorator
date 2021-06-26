@@ -3,15 +3,16 @@
 # abd.py
 
 #
-# Python 3.2 compatible
+# Python 3.4 compatible
 #
 
 import functools
+from abc import ABC, abstractmethod
 
 __all__ = ['ABD', 'AbstractBaseDecorator', 'BaseDecorator']
 
 
-class AbstractBaseDecorator:
+class AbstractBaseDecorator(ABC):
     """Abstract class to make decorators or wrappers.
     To create a decorator or a wrapper:
       Inherit this class and add the `invoke` function to the class.
@@ -150,6 +151,7 @@ class AbstractBaseDecorator:
         self._deco_args = args
         self._deco_kwargs = kwargs
 
+    @abstractmethod
     def invoke(self, *args, **kwargs):
         # type: (*object, **object) -> object
         """When the decorated function is called

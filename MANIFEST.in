@@ -18,7 +18,7 @@ include abd/*
 
 # Exclude tests
 exclude test/*
-global-exclude test_*
+global-exclude test*
 
 # Exclude doc
 exclude doc/*

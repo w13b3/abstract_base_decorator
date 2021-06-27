@@ -4,7 +4,7 @@
 
 import unittest
 
-from abd.abd import BaseDecorator
+from abd import BaseDecorator
 
 
 class DecoratorPatternsTest(unittest.TestCase):

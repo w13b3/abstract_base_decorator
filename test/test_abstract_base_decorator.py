@@ -5,7 +5,7 @@
 import unittest
 from unittest import mock
 
-from abd.abd import ABD, AbstractBaseDecorator
+from abd import ABD, AbstractBaseDecorator
 
 
 class AbstractBaseDecoratorTest(unittest.TestCase):

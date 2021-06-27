@@ -8,6 +8,7 @@ import functools
 from abc import ABC, abstractmethod
 
 __all__ = ['ABD', 'AbstractBaseDecorator', 'BaseDecorator']
+_WRAPPER_ASSIGNMENTS = (*functools.WRAPPER_ASSIGNMENTS, '__code__')
 
 
 class AbstractBaseDecorator(ABC):
@@ -15,6 +16,50 @@ class AbstractBaseDecorator(ABC):
     To create a decorator or a wrapper:
       Inherit this class and add the `invoke` function to the class.
     The decorators accepts arguments & keyword arguments.
+    Example usage:
+    >>> class Return(AbstractBaseDecorator):
+    ...     # decorator that expects the `a` keyword
+    ...     #   with a callable as the keyword argument
+    ...     def __init__(self, *args, **kwargs):
+    ...         # check if an option is given
+    ...         if not kwargs:
+    ...             raise ValueError('Decorator option expected')
+    ...         super(Return, self).__init__(*args, **kwargs)
+    ...
+    ...     def invoke(self, *args, **kwargs):
+    ...         # catch and try to reverse the result
+    ...         result = self.decorated_object(*args, **kwargs)
+    ...         try: result = result[::-1]
+    ...         finally: return result
+    ...
+    ...     def result(self, *args, **kwargs):
+    ...         # add extra functionality to the decorated function
+    ...         deco_args, deco_kwargs = self.decorator_options
+    ...         res = self.decorated_object(*args, **kwargs)
+    ...         return_as = deco_kwargs.get('a', res)
+    ...         try: res = return_as(res)
+    ...         finally: return res
+    ...
+    >>> # Create a function with the decorator
+    >>> # Give the decorator the expected keyword argument: callable
+    >>> @Return(a=list)
+    ... def func(as_result):
+    ...     return as_result
+    ...
+    >>> # Call the added function which calls the decorated function
+    >>> #   that catches the result and tries to call the given option
+    >>> #   which is given to the decorator
+    >>> func.result('text')
+    ['t', 'e', 'x', 't']
+    >>> # Call the decorated function
+    >>> # `invoke` catches incoming (keyword arguments)
+    >>> #   calls the `decorated_object` and catches the result
+    >>> #   than tries reverse the result before returning the result
+    >>> func('reversed')
+    'desrever'
+    >>> # Call the decorated function directly with `decorated_object`
+    >>> func.decorated_object('list')
+    'list'
     """
     # class attributes
     _deco_args: Tuple = ()
@@ -132,7 +177,7 @@ class AbstractBaseDecorator(ABC):
 
     def _decorate(self, function: Callable) -> None:
         """Set the given function as the decorated function."""
-        functools.update_wrapper(self, function)
+        functools.update_wrapper(self, function, _WRAPPER_ASSIGNMENTS)
         self._decorated_obj = function
 
     def set_decorator_options(self, *args: object, **kwargs: object) -> None:
@@ -154,6 +199,43 @@ ABD = AbstractBaseDecorator
 
 
 class BaseDecorator(ABD):
-    """Most basic decorator"""
+    """Most basic decorator
+    Example usage:
+    >>> class Info(BaseDecorator):
+    ...     def code_info(self):
+    ...         code = self.decorated_object.__code__
+    ...         info = {a: getattr(code, a) for a in dir(code)
+    ...                 if not a.startswith('_')}
+    ...         return info
+    ...     def invoke(self, *args, **kwargs):
+    ...         func_name = self.decorated_object.__name__
+    ...         print('function: {0} is called'.format(repr(func_name)))
+    ...         return bool(args or kwargs)  # return for func
+    ...
+    >>> @Info
+    ... def func(arg, *, kw_only=None):
+    ...     pass  # No return
+    ...
+    >>> info = func.code_info()
+    >>> info['co_argcount']
+    1
+    >>> info['co_kwonlyargcount']
+    1
+    >>> func()  # expect False, because no argument is given
+    function: 'func' is called
+    False
+    >>> func('some argument')  # expect True, because an argument is given
+    function: 'func' is called
+    True
+    """
     def invoke(self, *args: object, **kwargs: object) -> Union[object, None]:
+        """Invoke is called the decorated function is called.
+        Can be overwritten when this class is inherited
+        """
         return self.decorated_object(*args, **kwargs)
+
+
+if __name__ == '__main__':
+    import doctest
+    test_results = doctest.testmod()
+    print(test_results)

@@ -45,9 +45,9 @@ NAME = 'abd'
 DESCRIPTION = 'Abstract base class for decorators'
 URL = 'https://github.com/w13b3/abstract_base_decorator'
 EMAIL = 'wiebe at email dot com'  # prevent warning 'missing meta-data'
-AUTHOR = 'wiebe'
+AUTHOR = 'Wiebe'
 REQUIRES_PYTHON = '>=3.6.0, <4'
-VERSION = ''  # change this
+VERSION = 'GIT'  # change this
 # If you do change the License, remember to change the Trove Classifier for that!
 LICENSE = "Mozilla Public License Version 2.0"
 
